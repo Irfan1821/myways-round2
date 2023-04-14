@@ -1,44 +1,36 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
 function FoodList() {
-  const [foods, setFoods] = useState([]);
-  const [filteredFoods, setFilteredFoods] = useState([]);
-  const [foodTypeFilter, setFoodTypeFilter] = useState("");
-  const [deliveryTimeFilter, setDeliveryTimeFilter] = useState(0);
+  const [filterType, setFilterType] = useState("");
+  const [filterDeliveryTime, setFilterDeliveryTime] = useState("");
 
-  useEffect(() => {
-    const storedFoods = JSON.parse(localStorage.getItem("foods")) || [];
-    setFoods(storedFoods);
-    setFilteredFoods(storedFoods);
-  }, []);
+  function handleTypeChange(event) {
+    setFilterType(event.target.value);
+  }
 
-  const handleFilter = (e) => {
-    e.preventDefault();
-    const filtered = foods.filter((food) => {
-      return (
-        (foodTypeFilter === "" || food.foodType === foodTypeFilter) &&
-        (deliveryTimeFilter === 0 || food.maxDeliveryTime <= deliveryTimeFilter)
-      );
-    });
-    setFilteredFoods(filtered);
-  };
+  function handleTimeChange(event) {
+    setFilterDeliveryTime(event.target.value);
+  }
 
-  const handleReset = (e) => {
-    e.preventDefault();
-    setFoodTypeFilter("");
-    setDeliveryTimeFilter(0);
-    setFilteredFoods(foods);
-  };
+  const foodList = JSON.parse(localStorage.getItem("foodList")) || [];
+
+  const filteredFoods = foodList.filter((food) => {
+    if (filterType && food.foodType !== filterType) {
+      return false;
+    }
+    if (filterDeliveryTime && food.maxDeliveryTime > filterDeliveryTime) {
+      return false;
+    }
+    return true;
+  });
 
   return (
     <div>
-      <form onSubmit={handleFilter}>
+      <h2>Food List</h2>
+      <form>
         <label>
           Food Type:
-          <select
-            value={foodTypeFilter}
-            onChange={(e) => setFoodTypeFilter(e.target.value)}
-          >
+          <select value={filterType} onChange={handleTypeChange}>
             <option value="">All</option>
             <option value="Delicious Food">Delicious Food</option>
             <option value="Nutritious Food">Nutritious Food</option>
@@ -48,23 +40,30 @@ function FoodList() {
           </select>
         </label>
         <label>
-          Delivery Time:
+          Max Delivery Time (minutes):
           <input
             type="number"
-            value={deliveryTimeFilter}
-            onChange={(e) => setDeliveryTimeFilter(e.target.value)}
+            value={filterDeliveryTime}
+            onChange={handleTimeChange}
           />
         </label>
-        <button type="submit">Filter</button>
-        <button onClick={handleReset}>Reset</button>
       </form>
-      <ul>
+      <div style={{ display: "flex" }}>
         {filteredFoods.map((food, index) => (
-          <li key={index}>
-            {food.foodName} ({food.foodType}) - {food.maxDeliveryTime} minutes
-          </li>
+          <div
+            key={index}
+            style={{
+              border: "1px solid #000",
+              margin: "10px",
+              padding: "0 10px",
+            }}
+          >
+            <h1>Food Nams: {food.food}</h1>
+            <p>Food type: {food.foodType}</p>
+            <p>Time Duration: {food.maxDeliveryTime}</p>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }
